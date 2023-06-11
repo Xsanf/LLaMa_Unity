@@ -5,11 +5,13 @@ It is based on the work of https://github.com/SciSharp/LLamaSharp
 It just so happened that there was a gap between the work on LLM (Large Language Models) that use Python and ordinary developers for whom such an environment is unacceptable. I would like to fill it by pushing the use of modern AI technologies in games and other applications. This example does not exhaust everything that the library provides. It allows you to load to the main LoRa model (low-rank adaptation model), quantize models and do much more. But what do you need, to good start learning?
 
 The example iscreated as an importable Unity package.
-Apologies in advance for its size, it includes the finished model wizardLM-7B.ggmlv3.q5_1.bin (https://huggingface.co/TheBloke/wizardLM-7B-GGML/tree/main)
-I included the model because the example is for people who may not have the right skills to work with LLM, so they need the example to just work and allow them to learn further and realize their creativity.
+You need to download the wizardLM-7B.ggmlv3.q5_1.bin model from the site (https://huggingface.co/TheBloke/wizardLM-7B-GGML/tree/main) and place it in the Assets\LLama\Models directory. The example will look for it. If you want a different model, then edit the LLaMa_control component on the stage.
+Because unsafe dll calls are used, you need to go to Edit > Project settings... > Player > additionalCompilerArguments and set the Allow `unsafe` Code flag. You may also need to raise the api Compatibility Level there.
+I explain this in such detail, because I assume that people who do not have much experience with LLM will use the example.
 In the main repository, you can see what other models you can work with and get a lot of other useful information.
 
-What is actually done.
+What exactly has been changed.
+
 Unity, as a multi-platform system, lags behind the development of the NET platform, since they have to coordinate the work of all libraries.
 Because of this, the example will only work on Unity 2021 and later. Earlier versions simply don't have the required level of NET support. But the master repository example still overtakes Unity and cannot be ported without fixes.
 
@@ -37,7 +39,51 @@ Additionally, there is a known issue with Unity. It does not unload the .dll its
 
 I used a quick but probably not the best solution. I look for loaded dlls through the process manager and reduce the counter of their calls there. I didn't understand why, but sometimes it doesn't help and the editor crashes.
 I hope there are people who are more familiar with the problem. But this just complicates debugging, it will not affect the operation of the application.
+in NativeApi.cs
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern bool FreeLibrary(IntPtr hModule);
+
+        public static void UnloadImportedDll(string DllPath)
+        {
+            foreach (System.Diagnostics.ProcessModule mod in System.Diagnostics.Process.GetCurrentProcess().Modules)
+            {
+                string m_Path = Path.GetFileName(mod.FileName);
+
+                if (m_Path == DllPath + ".dll")
+                {
+                    FreeLibrary(mod.BaseAddress);
+                    /* I'm too lazy to find out why the dll has two links. Somewhere there is a second access to the download. 
+                     * Therefore, I increment the call counter twice. When the counter = 0 DLL is unloaded by the system.
+                     * For performance, all this does not matter and is not necessary at all.But when debugging, it creates an eternal problem.
+                     * Until the DLL is loaded, the Unity project cannot be loaded. And he himself at the end does not unload the loaded DLL. 
+                     * Therefore, you have to restart the entire environment in order to start the project.This part is needed to simplify debugging. 
+                     * Allows you to unload the DLL forcibly when calling the end of the application.
+                    */
+                    try
+                    {
+                        FreeLibrary(mod.BaseAddress);
+                    }
+                    finally { }
+                }
+            }
+        }
+
+       
+In test.cs
+    void OnDestroy()
+    {
+ /*
+ * For application , all this does not matter and is not necessary at all. 
+ * But when debugging, it creates an eternal problem. Until the DLL is unloaded the Unity project cannot be loaded again. And he himself at the end does not unload the loaded DLL. 
+ * Therefore, you have to restart the entire environment in order to start the project. This part is needed to simplify debugging. 
+ * Allows you to unload the DLL forcibly when calling the end of the application.
+ */
+        NativeApi.UnloadImportedDll("libllama");
+        NativeApi.UnloadImportedDll("libllama-cuda12");
+        Debug.Log("Application end.");
+        Debug.Log("Unload all DLL.");
+    }
 
 I'll apologize right away)) I've been retired for a long time and do more with my grandchildren than programming. Therefore, I am not ready to actively participate in the development of this example.
 
-Take it and use it, it's just an old man's attempt to push the storyline a little bit))
+Take it and use it
