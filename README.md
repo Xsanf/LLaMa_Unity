@@ -5,7 +5,7 @@ It is based on the work of https://github.com/SciSharp/LLamaSharp
 It just so happened that there was a gap between the work on LLM (Large Language Models) that use Python and ordinary developers for whom such an environment is unacceptable. I would like to fill it by pushing the use of modern AI technologies in games and other applications. This example does not exhaust everything that the library provides. It allows you to load to the main LoRa model (low-rank adaptation model), quantize models and do much more. But what do you need, to good start learning?
 
 The example iscreated as an importable Unity package.
-You need to download the wizardLM-7B.ggmlv3.q5_1.bin model from the site (https://huggingface.co/TheBloke/wizardLM-7B-GGML/tree/main) and place it in the Assets\LLama\Models directory. The example will look for it. If you want a different model, then edit the LLaMa_control component on the stage.
+You need to download the wizardLM-7B.ggmlv3.q5_1.bin model from the site (https://huggingface.co/TheBloke/wizardLM-7B-GGML/tree/main) and place it in the Assets\StreamingAssets directory. The example will look for it. If you want a different model, then edit the LLaMa_control component on the stage.
 Because unsafe dll calls are used, you need to go to Edit > Project settings... > Player > additionalCompilerArguments and set the Allow `unsafe` Code flag. You may also need to raise the api Compatibility Level there.
 I explain this in such detail, because I assume that people who do not have much experience with LLM will use the example.
 In the main repository, you can see what other models you can work with and get a lot of other useful information.
