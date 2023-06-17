@@ -3,6 +3,9 @@ Because some people had problems setting up the project.
 The project is missing only the model itself (https://huggingface.co/TheBloke/wizardLM-7B-GGML/tree/main) and the compiler cache. The model must be placed in the Assets\StreamingAssets directory.
 Due to the lack of a cache, the first download of the project will take a little longer, but otherwise it simply won't fit on github. When the model is loaded for the first time, the model can display an arbitrary set of characters in the welcome window. Just answer the "User: Hi" greeting and press "Eval". The output window is editable so you can experiment. As before, unfortunately, restarting the program without restarting it can either succeed or cause an error. If it caused an error, the only thing that will help is to close the project and load it again. This is due to Unity's inability to unload DLLs.
 
+Yes, you can remove both libllama-cuda12.dll itself and its unloading into test.cs from the package, it is just a copy of libllama.dll. Because NativeApi.cs looks it up by the name libllama.dll
+
+
 1. This is not the final product.
 The purpose of this repository is to provide a working example of using LLaMa models in Unity.
 It is based on the work of https://github.com/SciSharp/LLamaSharp
